@@ -9,7 +9,7 @@ project (asgard
 ###############################################################################
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_options ("-g" "-Wall" "-Wextra" "-Wpedantic")
+add_compile_options ("-g" "-fopenmp" "-Wall" "-Wextra" "-Wpedantic")
 message (STATUS "CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}")
 
 # set up possible commandline input variable defaults (override with -D)
@@ -48,6 +48,7 @@ include (${CMAKE_SOURCE_DIR}/contrib/contrib.cmake)
 include (${CMAKE_SOURCE_DIR}/profiling/profiling.cmake)
 # sets HighFive_FOUND
 include (${CMAKE_SOURCE_DIR}/contrib/io.cmake)
+
 
 if(ASGARD_USE_OPENMP)
   find_package(OpenMP REQUIRED)
