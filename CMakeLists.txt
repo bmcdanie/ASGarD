@@ -9,7 +9,7 @@ project (asgard
 ###############################################################################
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_options ("-g" "-fopenmp" "-Wall" "-Wextra" "-Wpedantic")
+add_compile_options ("-g" "-Wall" "-Wextra" "-Wpedantic")
 message (STATUS "CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}")
 
 # set up possible commandline input variable defaults (override with -D)
@@ -48,7 +48,6 @@ include (${CMAKE_SOURCE_DIR}/contrib/contrib.cmake)
 include (${CMAKE_SOURCE_DIR}/profiling/profiling.cmake)
 # sets HighFive_FOUND
 include (${CMAKE_SOURCE_DIR}/contrib/io.cmake)
-
 
 if(ASGARD_USE_OPENMP)
   find_package(OpenMP REQUIRED)
@@ -109,6 +108,7 @@ endif ()
 target_link_libraries (basis PRIVATE matlab_utilities quadrature tensors)
 
 target_link_libraries (batch PRIVATE lib_dispatch coefficients connectivity chunk element_table pde tensors)
+
 if (ASGARD_USE_OPENMP)
    target_link_libraries(batch PRIVATE OpenMP::OpenMP_CXX)
 endif ()
