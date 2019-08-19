@@ -76,6 +76,7 @@ set (components
   batch
   coefficients
   connectivity
+  distribution
   element_table
   fast_math 
   chunk
@@ -83,7 +84,6 @@ set (components
   matlab_utilities
   pde
   permutations
-  plan
   program_options
   quadrature
   tensors
@@ -120,7 +120,7 @@ target_link_libraries (coefficients
 target_link_libraries (connectivity
   PRIVATE element_table matlab_utilities permutations tensors)
 
-target_link_libraries(chunk PRIVATE element_table fast_math pde)
+target_link_libraries(chunk PRIVATE distribution element_table fast_math pde)
 
 target_link_libraries (element_table
   PRIVATE permutations program_options tensors)
@@ -155,7 +155,7 @@ endif ()
 target_link_libraries (time_advance PRIVATE batch fast_math pde tensors INTERFACE element_table)
 
 target_link_libraries (transformations
-  PRIVATE connectivity matlab_utilities pde program_options
+  PRIVATE connectivity distribution matlab_utilities pde program_options
   quadrature tensors)
 
 # define the main application and its linking
