@@ -201,7 +201,7 @@ int main(int argc, char **argv)
 
     // FIXME fold initial sources into host space
     explicit_time_advance(*pde, table, initial_sources, host_space, rank_space,
-                          chunks, time, dt);
+                          chunks, plan, my_rank, time, dt);
 
     // FIXME this needs to be wrapped and serialized
     // print root mean squared error from analytic solution
