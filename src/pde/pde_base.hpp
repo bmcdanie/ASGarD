@@ -238,14 +238,10 @@ public:
     assert(degrees_freedom_1d == new_coefficients.nrows());
     assert(degrees_freedom_1d == new_coefficients.ncols());
     this->coefficients_.clear_and_resize(degrees_freedom_1d, degrees_freedom_1d)
-        .transfer_from(new_coefficients);
+        = new_coefficients;
   }
 
-  fk::matrix<P, mem_type::owner, resource::device> const &
-  get_coefficients() const
-  {
-    return coefficients_;
-  }
+  fk::matrix<P> const &get_coefficients() const { return coefficients_; }
 
   // small helper to return degrees of freedom given dimension
   int degrees_freedom(dimension<P> const d) const
@@ -287,7 +283,7 @@ private:
   P flux_scale_;
 
   // operator matrix for this term at a single dimension
-  fk::matrix<P, mem_type::owner, resource::device> coefficients_;
+  fk::matrix<P> coefficients_;
 };
 
 // ---------------------------------------------------------------------------
@@ -435,8 +431,7 @@ public:
   }
   term_set<P> const &get_terms() const { return terms_; }
 
-  fk::matrix<P, mem_type::owner, resource::device> const &
-  get_coefficients(int const term, int const dim) const
+  fk::matrix<P> const &get_coefficients(int const term, int const dim) const
   {
     return terms_[term][dim].get_coefficients();
   }

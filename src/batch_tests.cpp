@@ -2010,8 +2010,7 @@ TEMPLATE_TEST_CASE("kronmult batching", "[batch]", float, double)
     int const num_elems = 1;
 
     auto const pde = make_PDE<TestType>(PDE_opts::continuity_1, level, degree);
-    fk::matrix<TestType, mem_type::owner, resource::device> coefficient_matrix =
-        pde->get_coefficients(0, 0);
+
     // clang-format off
     fk::matrix<TestType> const A {
         { 2,  3,  4,  5}, 
@@ -2020,9 +2019,10 @@ TEMPLATE_TEST_CASE("kronmult batching", "[batch]", float, double)
 	{14, 15, 16, 17}};
     // clang-format on
 
-    fk::matrix<TestType> coeff_h(coefficient_matrix);
-    coeff_h.set_submatrix(0, 0, A);
-    coefficient_matrix.transfer_from(coeff_h);
+    auto coeff = pde->get_coefficients(0, 0);
+    coeff.set_submatrix(0, 0, A);
+    fk::matrix<TestType, mem_type::owner, resource::device> const
+        coefficient_matrix(coeff);
 
     fk::vector<TestType> const x_h{18, 19, 20, 21};
     fk::vector<TestType, mem_type::owner, resource::device> const x(x_h);
@@ -2064,8 +2064,6 @@ TEMPLATE_TEST_CASE("kronmult batching", "[batch]", float, double)
     int const num_elems = 2;
 
     auto const pde = make_PDE<TestType>(PDE_opts::continuity_1, level, degree);
-    fk::matrix<TestType, mem_type::owner, resource::device> coefficient_matrix =
-        pde->get_coefficients(0, 0);
 
     // clang-format off
     fk::matrix<TestType> const A {
@@ -2076,9 +2074,11 @@ TEMPLATE_TEST_CASE("kronmult batching", "[batch]", float, double)
 	{26, 27, 28, 29, 30, 31}, 
 	{32, 33, 34, 35, 36, 37}};
     // clang-format on
-    fk::matrix<TestType> coeff_h(coefficient_matrix);
-    coeff_h.set_submatrix(0, 0, A);
-    coefficient_matrix.transfer_from(coeff_h);
+
+    auto coeff = pde->get_coefficients(0, 0);
+    coeff.set_submatrix(0, 0, A);
+    fk::matrix<TestType, mem_type::owner, resource::device> const
+        coefficient_matrix(coeff);
 
     fk::vector<TestType> const x_h{18, 19, 20, 21};
     fk::vector<TestType, mem_type::owner, resource::device> const x(x_h);
@@ -2092,10 +2092,10 @@ TEMPLATE_TEST_CASE("kronmult batching", "[batch]", float, double)
     fk::matrix<TestType, mem_type::view, resource::device> const A_view_e1(
         coefficient_matrix, 2, 2 + degree - 1, 2, 2 + degree - 1);
 
-    fk::matrix<TestType, mem_type::view> const A_view_e0_h(
-        coeff_h, 0, degree - 1, 0, degree - 1);
-    fk::matrix<TestType, mem_type::view> const A_view_e1_h(
-        coeff_h, 2, 2 + degree - 1, 2, 2 + degree - 1);
+    fk::matrix<TestType, mem_type::view> const A_view_e0_h(A, 0, degree - 1, 0,
+                                                           degree - 1);
+    fk::matrix<TestType, mem_type::view> const A_view_e1_h(A, 2, 2 + degree - 1,
+                                                           2, 2 + degree - 1);
 
     fk::vector<TestType> const gold_e0 = A_view_e0_h * x_h;
     fk::vector<TestType> const gold_e1 = A_view_e1_h * x_h;

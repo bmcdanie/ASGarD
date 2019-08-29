@@ -205,6 +205,7 @@ int main(int argc, char **argv)
     explicit_time_advance(*pde, table, initial_sources, host_space, rank_space,
                           chunks, time, dt);
 
+    // FIXME this needs to be wrapped and serialized
     // print root mean squared error from analytic solution
     if (pde->has_analytic_soln)
     {
