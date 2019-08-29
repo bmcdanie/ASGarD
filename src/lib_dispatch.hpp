@@ -78,8 +78,9 @@ extern "C"
                int *info);
 }
 
-// -- precision/execution resource wrapper for blas --
+void initialize_libraries(int const local_rank);
 
+// -- precision/execution resource wrapper for blas --
 namespace lib_dispatch
 {
 template<typename P>
