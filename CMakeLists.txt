@@ -179,6 +179,7 @@ set (main_app_link_deps
   batch
   coefficients
   connectivity
+  distribution
   element_table
   matlab_utilities
   pde
