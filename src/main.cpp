@@ -199,6 +199,7 @@ int main(int argc, char **argv)
   {
     prec const time = i * dt;
 
+    // FIXME fold initial sources into host space
     explicit_time_advance(*pde, table, initial_sources, host_space, rank_space,
                           chunks, time, dt);
 
