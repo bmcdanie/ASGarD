@@ -1,5 +1,5 @@
 #include "mpi_instructions.hpp"
-
+#include <iostream>
 row_round_robin_wheel::row_round_robin_wheel(int const size)
     : size(size), current_index(0)
 {
@@ -77,13 +77,16 @@ mpi_instructions::gen_row_space_intervals()
        interval */
     else
     {
-      v[c].emplace_back(r_node, c_start - r_start, r_end - r_start);
-
+      v[c].emplace_back(++r_node, c_start - r_start, c_end - r_start);
       r_start = r_end + 1;
-
-      r_end = r_stop[++r_node];
-
+      r_end   = r_stop[r_node];
       c_start = r_start;
+      if (r_end >= c_end)
+      {
+        c_start = c_end + 1;
+        c_end   = c_stop[++c];
+        continue;
+      }
     }
   }
 
@@ -187,6 +190,17 @@ mpi_instructions::mpi_instructions(const std::vector<int> &&r_stop,
   const std::vector<std::vector<class mpi_node_and_range>> row_space_intervals =
       gen_row_space_intervals();
 
+  for (int i = 0; i < row_space_intervals.size(); ++i)
+  {
+    std::cout << i << '\n';
+    auto const rank_interval = row_space_intervals[i];
+    for (auto const nar : rank_interval)
+    {
+      std::cout << "lindex: " << nar.linear_index << '\n';
+      std::cout << nar.start << " : " << nar.stop << '\n';
+      std::cout << '\n';
+    }
+  }
   /* Captain! */
   /* generate mpi_message lists for each process node */
   gen_mpi_messages(row_space_intervals);

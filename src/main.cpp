@@ -225,10 +225,10 @@ int main(int argc, char **argv)
     {
       prec const time_multiplier = pde->exact_time((i + 1) * dt);
 
-      if (my_rank == 0)
-      {
-        host_space.x.print();
-      }
+      // if (my_rank == 0)
+      // {
+      //   host_space.x.print();
+      // }
       fk::vector<prec> const analytic_solution_t =
           analytic_solution * time_multiplier;
       fk::vector<prec> const diff = host_space.x - analytic_solution_t;

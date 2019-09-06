@@ -321,18 +321,20 @@ void prepare_inputs(fk::vector<P> const &source, fk::vector<P> &dest,
 
   // call send/recv
   auto const &my_subgrid = plan.at(my_rank);
-  auto const messages    = message_list.get_mpi_instructions(my_rank);
 
-  if (my_rank == 2)
-  {
-    for (auto const &message : messages.mpi_messages_in_order())
-    {
-      std::cout << (message.mpi_message_type == mpi_message_enum::send ? "send"
-                                                                       : "recv")
-                << " " << message.nar.linear_index << '\n';
-      std::cout << message.nar.start << " : " << message.nar.stop << '\n';
-    }
-  }
+  auto const messages = message_list.get_mpi_instructions(my_rank);
+
+  /* if (my_rank == 2)
+   {
+     for (auto const &message : messages.mpi_messages_in_order())
+     {
+       std::cout << (message.mpi_message_type == mpi_message_enum::send ? "send"
+                                                                        :
+   "recv")
+                 << " " << message.nar.linear_index << '\n';
+       std::cout << message.nar.start << " : " << message.nar.stop << '\n';
+     }
+   }*/
   for (auto const &message : messages.mpi_messages_in_order())
   {
     if (message.mpi_message_type == mpi_message_enum::send)
@@ -370,7 +372,6 @@ void prepare_inputs(fk::vector<P> const &source, fk::vector<P> &dest,
     }
   }
 }
-
 template void reduce_results(fk::vector<float> const &source,
                              fk::vector<float> &dest,
                              distribution_plan const &plan, int const my_rank);
