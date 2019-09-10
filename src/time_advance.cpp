@@ -142,7 +142,6 @@ void explicit_time_advance(PDE<P> const &pde, element_table const &table,
   fm::axpy(host_space.result_1, host_space.x, scale_1);
   fm::axpy(host_space.result_2, host_space.x, scale_2);
   fm::axpy(host_space.result_3, host_space.x, scale_3);
-
 }
 
 // scale source vectors for time
@@ -202,22 +201,6 @@ apply_explicit(PDE<P> const &pde, element_table const &elem_table,
     copy_chunk_outputs(pde, grid, rank_space, host_space, chunk);
   }
 }
-
-template void
-explicit_time_advance(PDE<float> const &pde, element_table const &table,
-                      std::vector<fk::vector<float>> const &unscaled_sources,
-                      host_workspace<float> &host_space,
-                      rank_workspace<float> &rank_space,
-                      std::vector<element_chunk> chunks, float const time,
-                      float const dt);
-
-template void
-explicit_time_advance(PDE<double> const &pde, element_table const &table,
-                      std::vector<fk::vector<double>> const &unscaled_sources,
-                      host_workspace<double> &host_space,
-                      rank_workspace<double> &rank_space,
-                      std::vector<element_chunk> chunks, double const time,
-                      double const dt);
 
 template void
 explicit_time_advance(PDE<float> const &pde, element_table const &table,
