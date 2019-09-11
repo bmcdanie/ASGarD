@@ -9,69 +9,6 @@ void explicit_time_advance(PDE<P> const &pde, element_table const &table,
                            std::vector<fk::vector<P>> const &unscaled_sources,
                            host_workspace<P> &host_space,
                            rank_workspace<P> &rank_space,
-                           std::vector<element_chunk> chunks, P const time,
-                           P const dt)
-{
-  assert(time >= 0);
-  assert(dt > 0);
-  assert(static_cast<int>(unscaled_sources.size()) == pde.num_sources);
-
-  fm::copy(host_space.x, host_space.x_orig);
-  // see
-  // https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#Explicit_Runge%E2%80%93Kutta_methods
-  P const a21 = 0.5;
-  P const a31 = -1.0;
-  P const a32 = 2.0;
-  P const b1  = 1.0 / 6.0;
-  P const b2  = 2.0 / 3.0;
-  P const b3  = 1.0 / 6.0;
-  P const c2  = 1.0 / 2.0;
-  P const c3  = 1.0;
-
-  apply_explicit(pde, table, chunks, host_space, rank_space);
-  scale_sources(pde, unscaled_sources, host_space.scaled_source, time);
-  fm::axpy(host_space.scaled_source, host_space.fx);
-
-  fm::copy(host_space.fx, host_space.result_1);
-  P const fx_scale_1 = a21 * dt;
-  fm::axpy(host_space.fx, host_space.x, fx_scale_1);
-
-  apply_explicit(pde, table, chunks, host_space, rank_space);
-  scale_sources(pde, unscaled_sources, host_space.scaled_source,
-                time + c2 * dt);
-  fm::axpy(host_space.scaled_source, host_space.fx);
-  fm::copy(host_space.fx, host_space.result_2);
-  fm::copy(host_space.x_orig, host_space.x);
-  P const fx_scale_2a = a31 * dt;
-  P const fx_scale_2b = a32 * dt;
-  fm::axpy(host_space.result_1, host_space.x, fx_scale_2a);
-  fm::axpy(host_space.result_2, host_space.x, fx_scale_2b);
-
-  apply_explicit(pde, table, chunks, host_space, rank_space);
-  scale_sources(pde, unscaled_sources, host_space.scaled_source,
-                time + c3 * dt);
-  fm::axpy(host_space.scaled_source, host_space.fx);
-  fm::copy(host_space.fx, host_space.result_3);
-
-  P const scale_1 = dt * b1;
-  P const scale_2 = dt * b2;
-  P const scale_3 = dt * b3;
-
-  fm::copy(host_space.x_orig, host_space.x);
-  fm::axpy(host_space.result_1, host_space.x, scale_1);
-  fm::axpy(host_space.result_2, host_space.x, scale_2);
-  fm::axpy(host_space.result_3, host_space.x, scale_3);
-
-  fm::copy(host_space.x, host_space.fx);
-}
-
-// this function executes an explicit time step using the current solution
-// vector x. on exit, the next solution vector is stored in fx.
-template<typename P>
-void explicit_time_advance(PDE<P> const &pde, element_table const &table,
-                           std::vector<fk::vector<P>> const &unscaled_sources,
-                           host_workspace<P> &host_space,
-                           rank_workspace<P> &rank_space,
                            std::vector<element_chunk> chunks,
                            distribution_plan const &plan, int const my_rank,
 
@@ -96,6 +33,7 @@ void explicit_time_advance(PDE<P> const &pde, element_table const &table,
   element_subgrid const &grid = plan.at(my_rank);
   int const elem_size         = element_segment_size(pde);
 
+  host_space.x.print("0");
   apply_explicit(pde, table, grid, chunks, host_space, rank_space);
   reduce_results(host_space.fx, host_space.reduced_fx, plan, my_rank);
 
@@ -108,6 +46,7 @@ void explicit_time_advance(PDE<P> const &pde, element_table const &table,
   P const fx_scale_1 = a21 * dt;
   fm::axpy(host_space.result_1, host_space.x, fx_scale_1);
 
+  host_space.x.print("1");
   apply_explicit(pde, table, grid, chunks, host_space, rank_space);
 
   reduce_results(host_space.fx, host_space.reduced_fx, plan, my_rank);
@@ -124,7 +63,7 @@ void explicit_time_advance(PDE<P> const &pde, element_table const &table,
 
   fm::axpy(host_space.result_1, host_space.x, fx_scale_2a);
   fm::axpy(host_space.result_2, host_space.x, fx_scale_2b);
-
+  host_space.x.print("2");
   apply_explicit(pde, table, grid, chunks, host_space, rank_space);
   reduce_results(host_space.fx, host_space.reduced_fx, plan, my_rank);
   scale_sources(pde, unscaled_sources, host_space.scaled_source,
