@@ -8,27 +8,6 @@
 #include <numeric>
 #include <random>
 
-struct distribution_test_init
-{
-  distribution_test_init()
-  {
-    auto const [rank, total_ranks] = initialize_distribution();
-    my_rank                        = rank;
-    num_ranks                      = total_ranks;
-  }
-  ~distribution_test_init() { finalize_distribution(); }
-  int get_my_rank() const { return my_rank; }
-  int get_num_ranks() const { return num_ranks; }
-
-private:
-  int my_rank;
-  int num_ranks;
-};
-
-#ifdef ASGARD_USE_MPI
-static distribution_test_init const distrib_test_info;
-#endif
-
 template<typename P>
 void relaxed_comparison(fk::vector<P> const &first, fk::vector<P> const &second)
 {
@@ -53,13 +32,7 @@ void time_advance_test(int const level, int const degree, PDE<P> &pde,
                        bool const full_grid                            = false,
                        std::vector<std::string> const &additional_args = {})
 {
-#ifdef ASGARD_USE_MPI
-  int const my_rank   = distrib_test_info.get_my_rank();
-  int const num_ranks = distrib_test_info.get_num_ranks();
-#else
-  int const my_rank   = 0;
-  int const num_ranks = 1;
-#endif
+  auto const [my_rank, num_ranks] = get_rank_info();
 
   std::vector<std::string> const args = [&additional_args, level, degree,
                                          full_grid]() {

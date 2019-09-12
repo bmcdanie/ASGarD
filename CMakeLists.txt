@@ -227,18 +227,20 @@ if (ASGARD_BUILD_TESTS)
 
   # Define ctest tests and their executables
   add_library (tests_general testing/tests_general.cpp)
+  add_library (tests_main testing/tests_main.cpp)
   target_link_libraries (tests_general PUBLIC Catch PRIVATE pde program_options)
+  target_link_libraries (tests_main PUBLIC Catch)
   foreach (component IN LISTS components)
     add_executable (${component}-tests src/${component}_tests.cpp)
     target_include_directories (${component}-tests PRIVATE ${CMAKE_SOURCE_DIR}/testing)
-    target_link_libraries (${component}-tests PRIVATE ${component} tests_general)
+    target_link_libraries (${component}-tests PRIVATE ${component} tests_general tests_main)
     # FIXME
     if (ASGARD_IO_HIGHFIVE AND "${component}" STREQUAL "io")
       target_link_libraries (io-tests PRIVATE highfive hdf5 tensors)
     endif ()
-    
+
     if (ASGARD_USE_MPI)
-      target_link_libraries (${component}-tests PRIVATE ${component} MPI::MPI_CXX)
+       target_link_libraries (${component}-tests PRIVATE ${component} MPI::MPI_CXX)
     endif ()
 
     add_test (NAME ${component}-test

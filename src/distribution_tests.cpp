@@ -1,27 +1,6 @@
 #include "distribution.hpp"
 #include "tests_general.hpp"
-
-struct distribution_test_init
-{
-  distribution_test_init()
-  {
-    auto const [rank, total_ranks] = initialize_distribution();
-    my_rank                        = rank;
-    num_ranks                      = total_ranks;
-  }
-  ~distribution_test_init() { finalize_distribution(); }
-
-  int get_my_rank() const { return my_rank; }
-  int get_num_ranks() const { return num_ranks; }
-
-private:
-  int my_rank;
-  int num_ranks;
-};
-
-#ifdef ASGARD_USE_MPI
-static distribution_test_init const distrib_test_info;
-#endif
+#include <mpi.h>
 
 TEST_CASE("subgrid struct", "[distribution]")
 {
@@ -363,10 +342,7 @@ TEMPLATE_TEST_CASE("allreduce across row of subgrids", "[distribution]", float,
 
   SECTION("multiple ranks")
   {
-#ifdef ASGARD_USE_MPI
-
-    int const my_rank   = distrib_test_info.get_my_rank();
-    int const num_ranks = distrib_test_info.get_num_ranks();
+    auto const [my_rank, num_ranks] = get_rank_info();
     if (my_rank < num_ranks)
     {
       int const degree   = 5;
@@ -404,9 +380,5 @@ TEMPLATE_TEST_CASE("allreduce across row of subgrids", "[distribution]", float,
 
       REQUIRE(fx == gold);
     }
-
-#else
-    REQUIRE(true);
-#endif
   }
 }
