@@ -366,8 +366,8 @@ public:
     // if default lev/degree not used
     if (num_levels > 0 || degree > 0)
     {
-      // FIXME -- temp -- eventually independent levels for each dim will be
-
+      // FIXME eventually independent levels for each dim will be
+      // supported
       for (dimension<P> &d : dimensions_)
       {
         if (num_levels > 0)
@@ -438,7 +438,7 @@ public:
   /* gives a vector of partial_term matrices to the term object so it can
      construct the full operator matrix */
   void
-  set_coefficients(fk::matrix<P> const coeffs, int const term, int const dim)
+  set_coefficients(fk::matrix<P> const & coeffs, int const term, int const dim)
   {
     assert(term >= 0);
     assert(term < num_terms);
@@ -448,7 +448,7 @@ public:
   }
 
   void set_partial_coefficients(int const term, int const dim, int const pterm,
-                                fk::matrix<P> const coeffs)
+                                fk::matrix<P> const & coeffs)
   {
     assert(term >= 0);
     assert(term < num_terms);
