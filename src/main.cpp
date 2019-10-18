@@ -187,7 +187,7 @@ int main(int argc, char **argv)
   // for those.
   //
   // FIXME eventually going to be settable from the cmake
-  static int const default_workspace_MB = 7000;
+  static int const default_workspace_MB = 10000;
 
   host_workspace<prec> host_space(*pde, subgrid);
   std::vector<element_chunk> const chunks = assign_elements(
