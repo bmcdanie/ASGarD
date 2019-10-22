@@ -44,7 +44,6 @@ TEST_CASE("options constructor/getters", "[options]")
     REQUIRE(o.do_poisson_solve());
     REQUIRE(o.get_cfl() == cfl);
     REQUIRE(o.get_selected_pde() == pde);
-    REQUIRE(o.is_valid());
   }
 
   SECTION("run w/ defaults")
