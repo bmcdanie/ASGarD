@@ -48,7 +48,7 @@ HighFive::DataSet initialize_output_file(fk::vector<P> const &vec)
 }
 
 template<typename P>
-void update_output_file(HighFive::DataSet &dataset, fk::vector<P> &vec)
+void update_output_file(HighFive::DataSet &dataset, fk::vector<P> const &vec)
 {
   // Cast vec.size() to a long unsigned int to make the warnings happy.
   // Why is fk::vector.size() returning a signed it anyway?
