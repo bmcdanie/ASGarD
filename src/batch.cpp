@@ -406,9 +406,9 @@ allocate_batches(PDE<P> const &pde, int const num_elems)
 // accelerator when the appropriate build options
 // are set.
 template<typename P>
-static void kron_base(fk::matrix<P, mem_type::view, resource::device> const A,
-                      fk::vector<P, mem_type::view, resource::device> x,
-                      fk::vector<P, mem_type::view, resource::device> y,
+static void kron_base(fk::matrix<P, mem_type::view, resource::device> const &A,
+                      fk::vector<P, mem_type::view, resource::device> const &x,
+                      fk::vector<P, mem_type::view, resource::device> const &y,
                       batch_operands_set<P> &batches, int const batch_offset,
                       int const degree, int const num_dims)
 {
@@ -446,10 +446,10 @@ static void kron_base(fk::matrix<P, mem_type::view, resource::device> const A,
 // is set
 template<typename P>
 void kronmult_to_batch_sets(
-    std::vector<fk::matrix<P, mem_type::view, resource::device>> const A,
-    fk::vector<P, mem_type::view, resource::device> x,
-    fk::vector<P, mem_type::view, resource::device> y,
-    std::vector<fk::vector<P, mem_type::view, resource::device>> const work,
+    std::vector<fk::matrix<P, mem_type::view, resource::device>> const &A,
+    fk::vector<P, mem_type::view, resource::device> const &x,
+    fk::vector<P, mem_type::view, resource::device> const &y,
+    std::vector<fk::vector<P, mem_type::view, resource::device>> const &work,
     std::vector<batch_operands_set<P>> &batches, int const batch_offset,
     PDE<P> const &pde)
 {
@@ -617,10 +617,7 @@ build_batches(PDE<P> const &pde, element_table const &elem_table,
     return builder;
   }();
 
-// loop over elements
-#ifdef ASGARD_USE_OPENMP
-#pragma omp parallel for
-#endif
+  // loop over elements
   for (int chunk_num = 0; chunk_num < static_cast<int>(chunk.size());
        ++chunk_num)
   {
@@ -645,6 +642,10 @@ build_batches(PDE<P> const &pde, element_table const &elem_table,
 
     // loop over connected elements. for now, we assume
     // full connectivity
+
+#ifdef ASGARD_USE_OPENMP
+#pragma omp parallel for
+#endif
     for (int j = connected.start; j <= connected.stop; ++j)
     {
       // get linearized indices for this connected element
@@ -680,7 +681,7 @@ build_batches(PDE<P> const &pde, element_table const &elem_table,
         // y space, where kron outputs are written
         int const y_index = elem_size * kron_index;
 
-        fk::vector<P, mem_type::view, resource::device> const y_view(
+        fk::vector<P, mem_type::view, resource::device> y_view(
             workspace.reduction_space, y_index, y_index + elem_size - 1);
 
         // work space, intermediate kron data
@@ -698,16 +699,20 @@ build_batches(PDE<P> const &pde, element_table const &elem_table,
         }
 
         // operator views, windows into operator matrix
-        std::vector<fk::matrix<P, mem_type::view, resource::device>>
-            operator_views;
-        for (int d = pde.num_dims - 1; d >= 0; --d)
-        {
-          operator_views.push_back(
-              fk::matrix<P, mem_type::view, resource::device>(
-                  pde.get_coefficients(k, d), operator_row(d),
-                  operator_row(d) + degree - 1, operator_col(d),
-                  operator_col(d) + degree - 1));
-        }
+        std::vector<fk::matrix<P, mem_type::view, resource::device>> const
+            operator_views = [&pde, &operator_row, &operator_col, degree, k]() {
+              std::vector<fk::matrix<P, mem_type::view, resource::device>>
+                  operator_views;
+              for (int d = pde.num_dims - 1; d >= 0; --d)
+              {
+                operator_views.push_back(
+                    fk::matrix<P, mem_type::view, resource::device>(
+                        pde.get_coefficients(k, d), operator_row(d),
+                        operator_row(d) + degree - 1, operator_col(d),
+                        operator_col(d) + degree - 1));
+              }
+              return operator_views;
+            }();
 
         // determine the index for the input vector
         // j - connected start is the first connected element
@@ -863,19 +868,20 @@ template std::vector<batch_operands_set<double>>
 allocate_batches(PDE<double> const &pde, int const num_elems);
 
 template void kronmult_to_batch_sets(
-    std::vector<fk::matrix<float, mem_type::view, resource::device>> const A,
-    fk::vector<float, mem_type::view, resource::device> x,
-    fk::vector<float, mem_type::view, resource::device> y,
-    std::vector<fk::vector<float, mem_type::view, resource::device>> const work,
+    std::vector<fk::matrix<float, mem_type::view, resource::device>> const &A,
+    fk::vector<float, mem_type::view, resource::device> const &x,
+    fk::vector<float, mem_type::view, resource::device> const &y,
+    std::vector<fk::vector<float, mem_type::view, resource::device>> const
+        &work,
     std::vector<batch_operands_set<float>> &batches, int const batch_offset,
     PDE<float> const &pde);
 
 template void kronmult_to_batch_sets(
-    std::vector<fk::matrix<double, mem_type::view, resource::device>> const A,
-    fk::vector<double, mem_type::view, resource::device> x,
-    fk::vector<double, mem_type::view, resource::device> y,
+    std::vector<fk::matrix<double, mem_type::view, resource::device>> const &A,
+    fk::vector<double, mem_type::view, resource::device> const &x,
+    fk::vector<double, mem_type::view, resource::device> const &y,
     std::vector<fk::vector<double, mem_type::view, resource::device>> const
-        work,
+        &work,
     std::vector<batch_operands_set<double>> &batches, int const batch_offset,
     PDE<double> const &pde);
 
