@@ -87,7 +87,7 @@ batch<P, resrc>::~batch()
 }
 
 template<typename P, resource resrc>
-bool batch<P, resrc>::operator==(batch<P, resrc> other) const
+bool batch<P, resrc>::operator==(batch<P, resrc> const &other) const
 {
   if (nrows() != other.nrows())
   {
@@ -133,7 +133,7 @@ P *batch<P, resrc>::operator()(int const position) const
 // at the index indicated by position argument
 // cannot overwrite previous assignment
 template<typename P, resource resrc>
-void batch<P, resrc>::assign_entry(fk::matrix<P, mem_type::view, resrc> const a,
+void batch<P, resrc>::assign_entry(fk::matrix<P, mem_type::view, resrc> const & a,
                                    int const position)
 {
   // make sure this matrix is the
@@ -176,7 +176,7 @@ bool batch<P, resrc>::clear_entry(int const position)
 // provide a direct access to P**
 // from batch_, ~~but avoid for now~~ yep :-(
 template<typename P, resource resrc>
-P **batch<P, resrc>::get_list() const
+P ** const &batch<P, resrc>::get_list() const
 {
   return batch_;
 }
