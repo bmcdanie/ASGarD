@@ -33,7 +33,7 @@ options::options(int argc, char **argv)
                          "visualization_frequency")["-z"]["--vis_freq"](
           "Frequency in steps for visualizing output");
 
-  auto result = cli.parse(clara::detail::Args(argc, argv));
+  auto const result = cli.parse(clara::detail::Args(argc, argv));
   if (!result)
   {
     std::cerr << "Error in command line parsing: " << result.errorMessage()
@@ -57,9 +57,9 @@ options::options(int argc, char **argv)
     std::cerr << "Degree must be a natural number" << std::endl;
     valid = false;
   }
-  if (level < 1 && level != -1)
+  if (level < 2 && level != -1)
   {
-    std::cerr << "Level must be a natural number" << std::endl;
+    std::cerr << "Level must be greater than 1" << std::endl;
     valid = false;
   }
   if (num_time_steps < 1)
@@ -84,10 +84,6 @@ options::options(int argc, char **argv)
   {
     std::cerr << "Frequencies must be non-negative: " << std::endl;
     valid = false;
-  }
-  if (!valid)
-  {
-    exit(-1);
   }
 }
 

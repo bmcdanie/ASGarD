@@ -25,6 +25,14 @@
 using prec = double;
 int main(int argc, char **argv)
 {
+
+  // -- parse user input
+  options opts(argc, argv);
+  if(!opts.is_valid()) {
+    node_out() << "invalid command line options" << '\n';
+    exit(-1);
+  }
+
   // -- set up distribution
   auto const [my_rank, num_ranks] = initialize_distribution();
 
@@ -40,19 +48,7 @@ int main(int argc, char **argv)
              << '\n';
   node_out() << "This executable was built on " << BUILD_TIME << '\n';
 
-  options opts(argc, argv);
-
-  if (opts.using_implicit())
-  {
-    // distribution of implicit time advance not yet implemented
-    assert(num_ranks == 1);
-// gpu-enabled implicit time advance not yet implemented
-#ifdef ASGARD_USE_CUDA
-    assert(false);
-#endif
-  }
-
-  // -- parse user input and generate pde
+  // -- generate pde
   node_out() << "generating: pde..." << '\n';
   auto pde = make_PDE<prec>(opts.get_selected_pde(), opts.get_level(),
                             opts.get_degree());
