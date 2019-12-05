@@ -107,11 +107,10 @@ apply_explicit(PDE<P> const &pde, element_table const &elem_table,
 {
   fm::scal(static_cast<P>(0.0), host_space.fx);
 
+  // copy in inputs
+  copy_grid_inputs(pde, grid, rank_space, host_space); //, chunk);
   for (auto const &chunk : chunks)
   {
-    // copy in inputs
-    copy_chunk_inputs(pde, grid, rank_space, host_space, chunk);
-
     // build batches for this chunk
     std::vector<batch_operands_set<P>> batches =
         build_batches(pde, elem_table, rank_space, chunk);
