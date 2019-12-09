@@ -434,6 +434,7 @@ apply_fmwt(fk::matrix<P> const &fmwt, fk::matrix<P> const &coefficient_matrix,
            int const kdegree, int const num_levels, bool const fmwt_left,
            bool const fmwt_trans)
 {
+  assert(num_levels > 1);
   int const n_col = kdegree * pow(2, num_levels);
   fk::matrix<P> product(n_col, n_col);
   int row_start = 0;
