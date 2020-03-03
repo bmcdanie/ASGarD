@@ -113,19 +113,21 @@ public:
            resource r_ = resrc, typename = enable_for_host<r_>>
   vector(fk::matrix<P> const &);
 
-  template<mem_type m_ = mem, typename = enable_for_view<m_>>
-  explicit vector(fk::vector<P, mem_type::owner, resrc> &vec,
-                  int const start_index, int const stop_index);
-  template<mem_type m_ = mem, typename = enable_for_const_view<m_>>
-  explicit vector(fk::vector<P, mem_type::owner, resrc> const &vec,
+  template<mem_type omem, mem_type m_ = mem, typename = enable_for_view<m_>>
+  explicit vector(fk::vector<P, omem, resrc> &source, int const start_index,
+                  int const stop_index);
+  template<mem_type omem, mem_type m_ = mem,
+           typename = enable_for_const_view<m_>>
+  explicit vector(fk::vector<P, omem, resrc> const &source,
                   int const start_index, int const stop_index);
 
   // overloads for default case - whole vector
-  template<mem_type m_ = mem, typename = enable_for_view<m_>>
-  explicit vector(fk::vector<P, mem_type::owner, resrc> &owner);
+  template<mem_type omem, mem_type m_ = mem, typename = enable_for_view<m_>>
+  explicit vector(fk::vector<P, omem, resrc> &source);
 
-  template<mem_type m_ = mem, typename = enable_for_const_view<m_>>
-  explicit vector(fk::vector<P, mem_type::owner, resrc> const &owner);
+  template<mem_type omem, mem_type m_ = mem,
+           typename = enable_for_const_view<m_>>
+  explicit vector(fk::vector<P, omem, resrc> const &source);
 
   ~vector();
 
@@ -310,8 +312,9 @@ public:
 private:
   // const/nonconst view constructors delegate to this private constructor
   // delegated is a dummy variable to enable resolution
-  template<mem_type m_ = mem, typename = enable_for_all_views<m_>>
-  explicit vector(fk::vector<P, mem_type::owner, resrc> const &vec,
+  template<mem_type omem, mem_type m_ = mem,
+           typename = enable_for_all_views<m_>>
+  explicit vector(fk::vector<P, omem, resrc> const &source,
                   int const start_index, int const stop_index,
                   bool const delegated);
   P *data_;  //< pointer to elements
@@ -805,35 +808,33 @@ fk::vector<P, mem, resrc>::vector(fk::matrix<P> const &mat)
 // vector view constructor given a start and stop index
 // modifiable view version - delegates to private constructor
 template<typename P, mem_type mem, resource resrc>
-template<mem_type, typename>
-fk::vector<P, mem, resrc>::vector(fk::vector<P, mem_type::owner, resrc> &vec,
+template<mem_type omem, mem_type, typename>
+fk::vector<P, mem, resrc>::vector(fk::vector<P, omem, resrc> &source,
                                   int const start_index, int const stop_index)
-    : vector(vec, start_index, stop_index, true)
+    : vector(source, start_index, stop_index, true)
 {}
 
 // const view version - delegates to private constructor
 template<typename P, mem_type mem, resource resrc>
-template<mem_type, typename>
-fk::vector<P, mem, resrc>::vector(
-    fk::vector<P, mem_type::owner, resrc> const &vec, int const start_index,
-    int const stop_index)
-    : vector(vec, start_index, stop_index, true)
+template<mem_type omem, mem_type, typename>
+fk::vector<P, mem, resrc>::vector(fk::vector<P, omem, resrc> const &source,
+                                  int const start_index, int const stop_index)
+    : vector(source, start_index, stop_index, true)
 {}
 
 // delegating constructor to extract view from owner. overload for default case
 // of viewing the entire owner
 // const view version
 template<typename P, mem_type mem, resource resrc>
-template<mem_type, typename>
-fk::vector<P, mem, resrc>::vector(
-    fk::vector<P, mem_type::owner, resrc> const &a)
+template<mem_type omem, mem_type, typename>
+fk::vector<P, mem, resrc>::vector(fk::vector<P, omem, resrc> const &a)
     : vector(a, 0, std::max(0, a.size() - 1), true)
 {}
 
 // modifiable view version
 template<typename P, mem_type mem, resource resrc>
-template<mem_type, typename>
-fk::vector<P, mem, resrc>::vector(fk::vector<P, mem_type::owner, resrc> &a)
+template<mem_type omem, mem_type, typename>
+fk::vector<P, mem, resrc>::vector(fk::vector<P, omem, resrc> &a)
     : vector(a, 0, std::max(0, a.size() - 1), true)
 {}
 
@@ -1450,23 +1451,23 @@ int fk::vector<P, mem, resrc>::get_num_views() const
 
 // const/nonconst view constructors delegate to this private constructor
 template<typename P, mem_type mem, resource resrc>
-template<mem_type, typename>
-fk::vector<P, mem, resrc>::vector(
-    fk::vector<P, mem_type::owner, resrc> const &vec, int const start_index,
-    int const stop_index, bool const delegated)
-    : ref_count_{vec.ref_count_}
+template<mem_type omem, mem_type, typename>
+fk::vector<P, mem, resrc>::vector(fk::vector<P, omem, resrc> const &source,
+                                  int const start_index, int const stop_index,
+                                  bool const delegated)
+    : ref_count_{source.ref_count_}
 {
   // ignore dummy argument to avoid compiler warnings
   ignore(delegated);
   data_ = nullptr;
   size_ = 0;
-  if (vec.size() > 0)
+  if (source.size() > 0)
   {
     assert(start_index >= 0);
-    assert(stop_index < vec.size());
+    assert(stop_index < source.size());
     assert(stop_index >= start_index);
 
-    data_ = vec.data_ + start_index;
+    data_ = source.data_ + start_index;
     size_ = stop_index - start_index + 1;
   }
 }
