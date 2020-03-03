@@ -25,7 +25,6 @@
 using prec = double;
 int main(int argc, char **argv)
 {
-
   options opts(argc, argv);
   if (!opts.is_valid())
   {
