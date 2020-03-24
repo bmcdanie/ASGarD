@@ -4,7 +4,7 @@
 #include "distribution.hpp"
 #include "program_options.hpp"
 #include "tensors.hpp"
-
+#include "timer.hpp"
 // this function executes a time step using the current solution
 // vector x (in host_space).
 // on exit, the next solution vector is stored in x.
@@ -44,7 +44,8 @@ apply_A(PDE<P> const &pde, element_table const &elem_table,
   for (auto const &chunk : chunks)
   {
     // build batches for this chunk
-    build_batches(pde, elem_table, dev_space, grid, chunk, batches);
+    timer(build_batches<P>, "build_batches", pde, elem_table, dev_space, grid,
+          chunk, batches);
 
     // do the gemms
     P const alpha = 1.0;
@@ -55,11 +56,12 @@ apply_A(PDE<P> const &pde, element_table const &elem_table,
       batch<P> const &b = batches[i][1];
       batch<P> const &c = batches[i][2];
 
-      batched_gemm(a, b, c, alpha, beta);
+      timer(batched_gemm<P, resource::device>, "batched_gemm", a, b, c, alpha,
+            beta);
     }
 
     // do the reduction
-    reduce_chunk(pde, dev_space, grid, chunk);
+    timer(reduce_chunk<P>, "reduce chunk", pde, dev_space, grid, chunk);
   }
 
   // copy outputs back from GPU

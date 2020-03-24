@@ -46,7 +46,8 @@ void explicit_time_advance(PDE<P> const &pde, element_table const &table,
   std::vector<batch_operands_set<P>> batches =
       allocate_batches<P>(pde, max_elems);
 
-  apply_A(pde, table, grid, chunks, host_space, dev_space, batches);
+  timer(apply_A<P>, "applyA", pde, table, grid, chunks, host_space, dev_space,
+        batches);
   reduce_results(host_space.fx, host_space.reduced_fx, plan, my_rank);
   scale_sources(pde, unscaled_sources, host_space.scaled_source, time);
   fm::axpy(host_space.scaled_source, host_space.reduced_fx);
@@ -56,7 +57,8 @@ void explicit_time_advance(PDE<P> const &pde, element_table const &table,
   P const fx_scale_1 = a21 * dt;
   fm::axpy(host_space.result_1, host_space.x, fx_scale_1);
 
-  apply_A(pde, table, grid, chunks, host_space, dev_space, batches);
+  timer(apply_A<P>, "applyA", pde, table, grid, chunks, host_space, dev_space,
+        batches);
   reduce_results(host_space.fx, host_space.reduced_fx, plan, my_rank);
   scale_sources(pde, unscaled_sources, host_space.scaled_source,
                 time + c2 * dt);
@@ -71,7 +73,8 @@ void explicit_time_advance(PDE<P> const &pde, element_table const &table,
   fm::axpy(host_space.result_1, host_space.x, fx_scale_2a);
   fm::axpy(host_space.result_2, host_space.x, fx_scale_2b);
 
-  apply_A(pde, table, grid, chunks, host_space, dev_space, batches);
+  timer(apply_A<P>, "applyA", pde, table, grid, chunks, host_space, dev_space,
+        batches);
   reduce_results(host_space.fx, host_space.reduced_fx, plan, my_rank);
   scale_sources(pde, unscaled_sources, host_space.scaled_source,
                 time + c3 * dt);

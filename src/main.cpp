@@ -5,6 +5,7 @@
 #include "connectivity.hpp"
 #include "distribution.hpp"
 #include "element_table.hpp"
+#include "timer.hpp"
 
 #ifdef ASGARD_IO_HIGHFIVE
 #include "io.hpp"
@@ -245,8 +246,8 @@ int main(int argc, char **argv)
     else
     {
       // FIXME fold initial sources into host space
-      explicit_time_advance(*pde, table, initial_sources, host_space, dev_space,
-                            chunks, plan, time, dt);
+      timer(explicit_time_advance<prec>, "TA", (*pde), table, initial_sources,
+            host_space, dev_space, chunks, plan, time, dt);
     }
 
     // print root mean squared error from analytic solution
