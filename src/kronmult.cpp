@@ -219,7 +219,7 @@ execute(PDE<P> const &pde, element_table const &elem_table,
 
   timer::record.start("kronmult");
   call_kronmult(degree, input_ptrs, output_ptrs, work_ptrs, operator_ptrs, lda,
-                total_kronmults, pde.num_dims);
+                total_kronmults, pde.num_dims, degree);
   timer::record.stop("kronmult", flops);
 
   fk::delete_device(element_x);

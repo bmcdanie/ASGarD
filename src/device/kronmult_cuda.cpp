@@ -271,37 +271,58 @@ void prepare_kronmult(int const *const flattened_table,
 template<typename P>
 void call_kronmult(int const n, P *x_ptrs[], P *output_ptrs[], P *work_ptrs[],
                    P const *const operator_ptrs[], int const lda,
-                   int const num_krons, int const num_dims)
+                   int const num_krons, int const num_dims, int const degree)
 {
 #ifdef ASGARD_USE_CUDA
   {
-    int constexpr warpsize    = 32;
-    int constexpr nwarps      = 8;
-    int constexpr num_threads = nwarps * warpsize;
+    auto constexpr warpsize = 32;
+    auto const nwarps       = std::min(32, degree);
+    auto const num_threads  = nwarps * warpsize;
 
     switch (num_dims)
     {
     case 1:
+
+      cudaFuncSetAttribute(kronmult1_xbatched<P>,
+                           cudaFuncAttributePreferredSharedMemoryCarveout,
+                           cudaFuncCachePreferL1);
       kronmult1_xbatched<P><<<num_krons, num_threads>>>(
           n, operator_ptrs, lda, x_ptrs, output_ptrs, work_ptrs, num_krons);
       break;
     case 2:
+
+      cudaFuncSetAttribute(kronmult2_xbatched<P>,
+                           cudaFuncAttributePreferredSharedMemoryCarveout,
+                           cudaFuncCachePreferL1);
       kronmult2_xbatched<P><<<num_krons, num_threads>>>(
           n, operator_ptrs, lda, x_ptrs, output_ptrs, work_ptrs, num_krons);
       break;
     case 3:
+      cudaFuncSetAttribute(kronmult3_xbatched<P>,
+                           cudaFuncAttributePreferredSharedMemoryCarveout,
+                           cudaFuncCachePreferL1);
       kronmult3_xbatched<P><<<num_krons, num_threads>>>(
           n, operator_ptrs, lda, x_ptrs, output_ptrs, work_ptrs, num_krons);
       break;
     case 4:
+      cudaFuncSetAttribute(kronmult4_xbatched<P>,
+                           cudaFuncAttributePreferredSharedMemoryCarveout,
+                           cudaFuncCachePreferL1);
       kronmult4_xbatched<P><<<num_krons, num_threads>>>(
           n, operator_ptrs, lda, x_ptrs, output_ptrs, work_ptrs, num_krons);
       break;
     case 5:
+
+      cudaFuncSetAttribute(kronmult5_xbatched<P>,
+                           cudaFuncAttributePreferredSharedMemoryCarveout,
+                           cudaFuncCachePreferL1);
       kronmult5_xbatched<P><<<num_krons, num_threads>>>(
           n, operator_ptrs, lda, x_ptrs, output_ptrs, work_ptrs, num_krons);
       break;
     case 6:
+      cudaFuncSetAttribute(kronmult6_xbatched<P>,
+                           cudaFuncAttributePreferredSharedMemoryCarveout,
+                           cudaFuncCachePreferL1);
       kronmult6_xbatched<P><<<num_krons, num_threads>>>(
           n, operator_ptrs, lda, x_ptrs, output_ptrs, work_ptrs, num_krons);
       break;
@@ -378,9 +399,11 @@ template void prepare_kronmult(
 template void call_kronmult(int const n, float *x_ptrs[], float *output_ptrs[],
                             float *work_ptrs[],
                             float const *const operator_ptrs[], int const lda,
-                            int const num_krons, int const num_dims);
+                            int const num_krons, int const num_dims,
+                            int const degree);
 
 template void call_kronmult(int const n, double *x_ptrs[],
                             double *output_ptrs[], double *work_ptrs[],
                             double const *const operator_ptrs[], int const lda,
-                            int const num_krons, int const num_dims);
+                            int const num_krons, int const num_dims,
+                            int const degree);
