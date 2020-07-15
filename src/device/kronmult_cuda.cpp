@@ -293,7 +293,7 @@ void call_kronmult(int const n, P *x_ptrs[], P *output_ptrs[], P *work_ptrs[],
 #ifdef ASGARD_USE_CUDA
   {
     int constexpr warpsize    = 32;
-    int constexpr nwarps      = 8;
+    int constexpr nwarps      = 1;
     int constexpr num_threads = nwarps * warpsize;
 
     switch (num_dims)
