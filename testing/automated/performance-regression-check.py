@@ -5,9 +5,9 @@ import csv
 import subprocess
 import re
 import sys
+import argparse
 
 # constants
-BENCH_FILE = 'bench.txt'
 RUN_ENTRIES = 2 # run structure: asgard args, average timestep
 EMPTY_RUN = ""
 ASGARD_PATH = "../../build/asgard" # is there a better way to do this? not relocatable...
@@ -58,8 +58,12 @@ def within_performance_range(old_time, new_time):
 	return True	
 
 # execution
+parser = argparse.ArgumentParser(description='--Run benchmark performance tests for ASGarD--')
+parser.add_argument('bench_file', help='benchmark file with arguments and timings')
+bench_file = parser.parse_args().bench_file
+
 timings = dict()
-with open(BENCH_FILE) as run_details:
+with open(bench_file) as run_details:
 	run_csv = csv.reader(run_details, delimiter=',')
 	commit = next(run_csv)[0]
 	print('bench commit: {}'.format(commit))
@@ -94,7 +98,7 @@ print('run commit: {}'.format(commit))
 # write benchmark if not present
 if no_data:
 	print('no benchmark set, writing new values now')
-	with open(BENCH_FILE,'w') as bench:
+	with open(bench_file,'w') as bench:
 		bench.write('{}\n'.format(commit))
 		for args, time in new_times.items():
 			bench.write('{},{}\n'.format(args, time)) 
