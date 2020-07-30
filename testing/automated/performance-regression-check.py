@@ -49,11 +49,11 @@ def within_performance_range(old_time, new_time):
 	if old_time == new_time:
 		diff = 0
 	try:
-		diff = (abs(old_time - new_time) / old_time) * 100.0
+		diff = (old_time - new_time) / old_time * 100.0
 	except ZeroDivisionError:
 		diff = float('inf')
 	print('difference = {}'.format(diff))
-	if diff > TOLERANCE:
+	if abs(diff) > TOLERANCE:
 		return False
 	return True	
 
