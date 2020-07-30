@@ -52,8 +52,8 @@ def within_performance_range(old_time, new_time):
 		diff = (abs(old_time - new_time) / old_time) * 100.0
 	except ZeroDivisionError:
 		diff = float('inf')
-	if diff > tolerance:
-		print('difference = {}, failed!'.format(diff))
+	print('difference = {}'.format(diff))
+	if diff > TOLERANCE:
 		return False
 	return True	
 
@@ -66,7 +66,6 @@ with open(BENCH_FILE) as run_details:
 	for run in run_csv:
 		assert(len(run) == RUN_ENTRIES), 'run args and avg timestep required for all runs'
 		asgard_args, avg_timestep_ms = run[:RUN_ENTRIES]
-		print(asgard_args)
 		if is_float(avg_timestep_ms):
 			timings[asgard_args] = float(avg_timestep_ms)
 		else:
@@ -80,20 +79,24 @@ no_data = (len(empty_keys) == len(timings))
 new_times = dict()
 for args, timing in timings.items():
 	run_cmd = [ASGARD_PATH] + args.split(' ')
+	print('now running: {}'.format(args))
 	result = subprocess.run(run_cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')	
 	new_time = parse_timestep_avg(result)
+	commit = parse_commit(result)
 	if no_data:	# setting new benchmark
 		new_times[args] = new_time
-		commit = parse_commit(result)
 	else:
 		if not within_performance_range(timing, new_time):
+			print('test failed!')
 			sys.exit(1)
+print('run commit: {}'.format(commit))
 
 # write benchmark if not present
 if no_data:
+	print('no benchmark set, writing new values now')
 	with open(BENCH_FILE,'w') as bench:
 		bench.write('{}\n'.format(commit))
 		for args, time in new_times.items():
 			bench.write('{},{}\n'.format(args, time)) 
 
-        
+print('successful test!')
