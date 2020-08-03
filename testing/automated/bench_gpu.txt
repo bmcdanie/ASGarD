@@ -1,4 +1,4 @@
 1234
--p continuity_2 -l 7 -d 9,
--p continuity_3 -l 5 -d 6,
+-p continuity_2 -l 8 -d 8,
+-p continuity_3 -l 4 -d 6,
 -p continuity_6 -l 3 -d 4,
