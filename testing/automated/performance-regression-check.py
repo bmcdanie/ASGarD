@@ -6,11 +6,13 @@ import subprocess
 import re
 import sys
 import argparse
+import os
 
 # constants
 RUN_ENTRIES = 2 # run structure: asgard args, average timestep
-EMPTY_RUN = ""
-ASGARD_PATH = "../../build/asgard" # is there a better way to do this? not relocatable...
+EMPTY_RUN = ''
+ASGARD_PATH = './asgard' # is there a better way to do this? not relocatable...
+NUM_THREADS = 8
 
 TIMESTEP_BEGIN = 'explicit_time_advance - avg: '
 TIMESTEP_END = ' min:'
@@ -81,10 +83,12 @@ no_data = (len(empty_keys) == len(timings))
 
 # run asgard to collect timing
 new_times = dict()
+os.environ['OMP_NUM_THREADS'] = '{}'.format(NUM_THREADS)
 for args, timing in timings.items():
 	run_cmd = [ASGARD_PATH] + args.split(' ')
 	print('now running: {}'.format(args))
-	result = subprocess.run(run_cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')	
+	result = subprocess.run(run_cmd, env=os.environ, 
+						    stdout=subprocess.PIPE).stdout.decode('utf-8')	
 	new_time = parse_timestep_avg(result)
 	commit = parse_commit(result)
 	if no_data:	# setting new benchmark
